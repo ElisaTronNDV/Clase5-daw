@@ -11,6 +11,7 @@ os.environ.setdefault("ALLOWED_ORIGINS", "http://localhost:4200")
 os.environ.setdefault("DEBUG", "false")
 
 from sqlalchemy import create_engine  # noqa: E402
+from sqlalchemy.orm import sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
@@ -44,9 +45,10 @@ def initialized_db(test_engine):
 def client(initialized_db):
     """TestClient con la dependencia de DB de la app apuntando a la base de test aislada.
 
-    No se usa init_db() aquí para no acoplarse a la DB real: se sobreescribe get_db (Block 2)
-    o, para Block 1 (sin routers propios), simplemente se evita que el evento de startup
-    toque el archivo dyp_lasercore.db.
+    No se usa init_db() aquí para no acoplarse a la DB real: el startup event queda
+    neutralizado (monkeypatch de init_db) y, además, get_db (Block 2) se sobreescribe
+    para que cada sesión de request se abra contra el engine de test aislado en vez de
+    tocar el archivo dyp_lasercore.db — nunca se opera contra datos reales (Rule #0).
     """
     from app.main import app
 
@@ -58,8 +60,24 @@ def client(initialized_db):
 
     original_init_db = main_module.init_db
     main_module.init_db = override_init_db
+
+    TestSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=initialized_db
+    )
+
+    def override_get_db():
+        db = TestSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    from app.api.deps import get_db
+
+    app.dependency_overrides[get_db] = override_get_db
     try:
         with TestClient(app) as test_client:
             yield test_client
     finally:
         main_module.init_db = original_init_db
+        app.dependency_overrides.pop(get_db, None)
