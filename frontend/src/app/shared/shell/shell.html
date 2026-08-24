@@ -1,0 +1,18 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand">DyP LaserCore</span>
+
+    <div class="navbar-nav me-auto">
+      <a class="nav-link" routerLink="/oficina" routerLinkActive="active">Oficina</a>
+      <a class="nav-link" routerLink="/taller" routerLinkActive="active">Taller</a>
+      <a class="nav-link" routerLink="/inventario" routerLinkActive="active">Inventario</a>
+      <a class="nav-link" routerLink="/configuracion" routerLinkActive="active">Configuración</a>
+    </div>
+
+    <button type="button" class="btn btn-outline-light" (click)="logout()">Cerrar sesión</button>
+  </div>
+</nav>
+
+<main class="container-fluid py-4">
+  <router-outlet></router-outlet>
+</main>
