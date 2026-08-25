@@ -96,3 +96,16 @@
   positivo documentado, 1 Low aceptado como riesgo documentado)
 - Result: **PASSED** — no hay Critical/High abiertos; el único Medium está formalmente suprimido con
   las 7 columnas requeridas (F-SAST-18); el Low está documentado (no bloquea).
+
+## Re-verificación — 2026-08-25 (cierre de CODE tras loop correctivo VERIFY→CODE)
+
+El loop correctivo (falta de evidencia TDD, ver `docs/daw/reports/verify-FEAT-001.md`) no modificó
+código: `git diff 85d5250 -- backend/app frontend/src` da vacío — `backend/app/**` y
+`frontend/src/app/**` son idénticos al commit ya escaneado arriba. Lo único agregado fueron los
+reportes de evidencia TDD (`docs/daw/reports/tdd-evidence-FEAT-001-*.md`), verificados sin secretos
+ni datos sensibles (grep de patrones de secreto/clave — 0 resultados).
+
+- Suppression 1 y 2: sin cambios, `review by` 2027-02-24, dentro de los 6 meses (F-SAST-19 no aplica
+  todavía).
+- Result: **PASSED** (sin re-escaneo completo, por ausencia de diff en el código — el hallazgo
+  previo sigue siendo la evaluación vigente).
