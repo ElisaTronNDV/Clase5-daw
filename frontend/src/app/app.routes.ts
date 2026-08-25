@@ -8,6 +8,7 @@ import { Home } from './home/home';
 import { Oficina } from './oficina/oficina';
 import { Taller } from './taller/taller';
 import { Inventario } from './inventario/inventario';
+import { ProductForm } from './inventario/product-form/product-form';
 import { Configuracion } from './configuracion/configuracion';
 
 export const routes: Routes = [
@@ -22,6 +23,8 @@ export const routes: Routes = [
       { path: 'oficina', component: Oficina },
       { path: 'taller', component: Taller },
       { path: 'inventario', component: Inventario },
+      { path: 'inventario/nuevo', component: ProductForm },
+      { path: 'inventario/:id/editar', component: ProductForm },
       { path: 'configuracion', component: Configuracion },
     ],
   },

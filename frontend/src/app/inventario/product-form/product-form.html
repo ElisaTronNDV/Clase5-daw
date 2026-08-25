@@ -1,0 +1,48 @@
+<div class="container py-4">
+  <h1 class="h3 mb-4">{{ isEditMode ? 'Editar producto' : 'Nuevo producto' }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="mb-3">
+      <label for="material" class="form-label">Material</label>
+      <input id="material" type="text" class="form-control" formControlName="material" />
+    </div>
+
+    <div class="mb-3">
+      <label for="espesor" class="form-label">Espesor</label>
+      <input id="espesor" type="number" class="form-control" formControlName="espesor" />
+    </div>
+
+    <div class="mb-3">
+      <label for="largo" class="form-label">Largo</label>
+      <input id="largo" type="number" class="form-control" formControlName="largo" />
+    </div>
+
+    <div class="mb-3">
+      <label for="ancho" class="form-label">Ancho</label>
+      <input id="ancho" type="number" class="form-control" formControlName="ancho" />
+    </div>
+
+    <div class="mb-3">
+      <label for="stock" class="form-label">Stock</label>
+      <input id="stock" type="number" class="form-control" formControlName="stock" />
+    </div>
+
+    <div class="mb-3">
+      <label for="punto_pedido" class="form-label">Punto de pedido</label>
+      <input id="punto_pedido" type="number" class="form-control" formControlName="punto_pedido" />
+    </div>
+
+    @if (isEditMode) {
+      <div class="mb-3">
+        <span class="form-label d-block">Stock comprometido</span>
+        <p class="form-control-plaintext mb-0">{{ stockComprometido() }}</p>
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
+  </form>
+</div>

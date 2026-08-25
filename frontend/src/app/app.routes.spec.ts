@@ -34,6 +34,19 @@ describe('routes', () => {
     }
   });
 
+  it('inventario/nuevo e inventario/:id/editar están definidas como hijas de la ruta protegida, sin canActivate propio', () => {
+    const rootRoute = routes.find((r) => r.path === '');
+    const children = rootRoute?.children ?? [];
+
+    const nuevoRoute = children.find((c) => c.path === 'inventario/nuevo');
+    const editarRoute = children.find((c) => c.path === 'inventario/:id/editar');
+
+    expect(nuevoRoute).toBeTruthy();
+    expect(editarRoute).toBeTruthy();
+    expect(nuevoRoute?.canActivate ?? []).toHaveLength(0);
+    expect(editarRoute?.canActivate ?? []).toHaveLength(0);
+  });
+
   it('la ruta comodín "**" redirige a la raíz', () => {
     const wildcard = routes.find((r) => r.path === '**');
 

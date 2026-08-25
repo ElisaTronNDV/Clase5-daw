@@ -1,3 +1,39 @@
 <div class="container py-4">
-  <p>Módulo en construcción</p>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Inventario</h1>
+    <a routerLink="/inventario/nuevo" class="btn btn-primary">Nuevo producto</a>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Material</th>
+        <th>Espesor</th>
+        <th>Largo</th>
+        <th>Ancho</th>
+        <th>Stock</th>
+        <th>Stock comprometido</th>
+        <th>Punto de pedido</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products(); track product.id) {
+        <tr>
+          <td>{{ product.material }}</td>
+          <td>{{ product.espesor }}</td>
+          <td>{{ product.largo }}</td>
+          <td>{{ product.ancho }}</td>
+          <td>{{ product.stock }}</td>
+          <td>{{ product.stock_comprometido }}</td>
+          <td>{{ product.punto_pedido }}</td>
+          <td>
+            <a [routerLink]="['/inventario', product.id, 'editar']" class="btn btn-sm btn-outline-secondary">
+              Editar
+            </a>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 </div>
