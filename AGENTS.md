@@ -51,7 +51,7 @@ Proyecto con dos stacks (backend + frontend separados en `backend/` y `frontend/
 | Framework | FastAPI (backend) · Angular 22 + Bootstrap 5 (frontend) |
 | Database | SQLite (SQLAlchemy ORM) |
 | Test runner | pytest (backend) · `ng test` (frontend) — ver nota sobre Karma/Vitest abajo |
-| Linter / formatter | N/A — no configurado aún (ni ESLint/Prettier ni ruff/black) |
+| Linter / formatter | Backend: N/A — no configurado aún (ni ruff/black). Frontend: Prettier configurado (`frontend/.prettierrc`, devDependency) pero sin script `format`/`format:check` ni CI que lo corra — `prettier --check .` si se decide gatearlo. |
 | Package manager | pip (backend) · npm (frontend) |
 
 **Librerías clave:**
