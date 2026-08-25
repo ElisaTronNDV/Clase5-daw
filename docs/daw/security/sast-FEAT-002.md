@@ -111,3 +111,18 @@ código que los afecta.
 - Result: **PASSED** — no hay Critical/High abiertos; las 2 suppressions heredadas siguen vigentes
   (dentro de los 6 meses, F-SAST-19 no aplica); la mitigación obligatoria del threat model
   (`extra="forbid"` en ambos schemas) está confirmada en código y en tests.
+
+## Re-verificación — 2026-08-25 (cierre de CODE tras loop correctivo VERIFY→CODE)
+
+El loop correctivo (falta de evidencia TDD + WARNs de AC-08/NFR-01, ver
+`docs/daw/reports/verify-FEAT-002.md`) no modificó código de producción: `git diff e0780b9 --
+backend/app frontend/src/app` da vacío. Lo único agregado fueron 2 tests
+(`test_update_responds_under_2s` en backend, un test de columnas en `inventario.spec.ts`) y 3
+reportes de documentación (`verify-FEAT-002.md`, `tdd-evidence-FEAT-002-backend.md`,
+`tdd-evidence-FEAT-002-frontend.md`), verificados sin secretos ni datos sensibles (grep de
+patrones de secreto/clave — 0 resultados).
+
+- Suppression 1 y 2: sin cambios, `review by` 2027-02-24, dentro de los 6 meses (F-SAST-19 no
+  aplica todavía).
+- Result: **PASSED** (sin re-escaneo completo, por ausencia de diff en el código — el hallazgo
+  previo sigue siendo la evaluación vigente).

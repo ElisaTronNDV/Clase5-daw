@@ -51,6 +51,30 @@ describe('Inventario', () => {
     expect(compiled.textContent).toContain('sae_1020');
   });
 
+  it('renderiza las 7 columnas requeridas para cada producto (AC-08)', () => {
+    const fixture = TestBed.createComponent(Inventario);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const rows = compiled.querySelectorAll('tbody tr');
+
+    expect(rows.length).toBe(2);
+    const firstRowCells = Array.from(rows[0].querySelectorAll('td')).map(
+      (cell) => cell.textContent?.trim(),
+    );
+
+    expect(firstRowCells).toEqual(
+      expect.arrayContaining([
+        'sae_1010', // material
+        '2.1', // espesor
+        '3000', // largo
+        '1500', // ancho
+        '10', // stock
+        '2', // stock_comprometido
+        '5', // punto_pedido
+      ]),
+    );
+  });
+
   it('muestra un botón para crear un nuevo producto', () => {
     const fixture = TestBed.createComponent(Inventario);
     fixture.detectChanges();

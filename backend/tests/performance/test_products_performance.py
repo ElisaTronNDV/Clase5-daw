@@ -42,3 +42,20 @@ def test_list_responds_under_2s(client):
 
     assert response.status_code == 200
     assert elapsed < 2.0
+
+
+def test_update_responds_under_2s(client):
+    headers = _auth_headers(client)
+    created = client.post("/api/products", json=_valid_payload(), headers=headers)
+    product_id = created.json()["id"]
+
+    start = time.monotonic()
+    response = client.put(
+        f"/api/products/{product_id}",
+        json=_valid_payload(stock=20),
+        headers=headers,
+    )
+    elapsed = time.monotonic() - start
+
+    assert response.status_code == 200
+    assert elapsed < 2.0
