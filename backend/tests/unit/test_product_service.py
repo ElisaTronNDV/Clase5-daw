@@ -82,3 +82,80 @@ def test_update_product_no_false_positive_against_itself(db):
 def test_get_product_by_id_not_found_raises(db):
     with pytest.raises(ProductNotFoundError):
         product_service.get_product_by_id(db, 9999)
+
+
+# --- Block 3 (FEAT-004): matching por tolerancia, compromiso de stock, alta automática ---
+
+
+def test_buscar_por_tolerancia_encuentra_dentro_del_margen(db):
+    product = product_service.create_product(
+        db, ProductCreate(**_payload(material="SAE_1010", espesor=2.1, largo=3000, ancho=1500))
+    )
+
+    found = product_service.buscar_por_tolerancia(
+        db, material="SAE_1010", espesor=2.1, largo=3000.8, ancho=1499.5, margen=1.0
+    )
+
+    assert found is not None
+    assert found.id == product.id
+
+
+def test_buscar_por_tolerancia_no_encuentra_fuera_del_margen(db):
+    product_service.create_product(
+        db, ProductCreate(**_payload(material="SAE_1010", espesor=2.1, largo=3000, ancho=1500))
+    )
+
+    found = product_service.buscar_por_tolerancia(
+        db, material="SAE_1010", espesor=2.1, largo=3005, ancho=1500, margen=1.0
+    )
+
+    assert found is None
+
+
+def test_buscar_por_tolerancia_material_case_insensitive(db):
+    product = product_service.create_product(
+        db, ProductCreate(**_payload(material="SAE_1010", espesor=2.1, largo=3000, ancho=1500))
+    )
+
+    found = product_service.buscar_por_tolerancia(
+        db, material="  sae_1010  ", espesor=2.1, largo=3000, ancho=1500, margen=1.0
+    )
+
+    assert found is not None
+    assert found.id == product.id
+
+
+def test_comprometer_stock_incrementa_correctamente(db):
+    product = product_service.create_product(db, ProductCreate(**_payload(stock=10)))
+
+    # Caso sintético: multiplicidad > 1 (ningún PDF de ejemplo real lo cubre).
+    multiplicidad = 4
+    updated = product_service.comprometer_stock(db, product, multiplicidad)
+
+    assert updated.stock_comprometido == 4
+
+    # Confirmar una segunda orden sobre el mismo producto acumula el compromiso.
+    updated = product_service.comprometer_stock(db, product, 1)
+    assert updated.stock_comprometido == 5
+
+
+def test_crear_producto_automatico_stock_cero(db):
+    product = product_service.crear_producto_automatico(
+        db, material="SAE_1010", espesor=2.1, largo=3000, ancho=1500
+    )
+
+    assert product.id is not None
+    assert product.stock == 0
+    assert product.stock_comprometido == 0
+    assert product.punto_pedido == 0
+
+
+def test_crear_producto_automatico_rechaza_duplicado(db):
+    product_service.create_product(
+        db, ProductCreate(**_payload(material="SAE_1010", espesor=2.1, largo=3000, ancho=1500))
+    )
+
+    with pytest.raises(ProductAlreadyExistsError):
+        product_service.crear_producto_automatico(
+            db, material="sae_1010", espesor=2.1, largo=3000, ancho=1500
+        )

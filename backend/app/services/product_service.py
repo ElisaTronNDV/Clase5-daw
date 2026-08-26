@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ProductAlreadyExistsError, ProductNotFoundError
@@ -74,4 +76,61 @@ def update_product(db: Session, product_id: int, data: ProductUpdate) -> Product
     product.punto_pedido = data.punto_pedido
     db.commit()
     db.refresh(product)
+    return product
+
+
+def buscar_por_tolerancia(
+    db: Session, material: str, espesor: float, largo: float, ancho: float, margen: float
+) -> Product | None:
+    """Matching por tolerancia dimensional (FR-12/FR-13 de FEAT-004): mismo material
+    (case-insensitive, vía `_normalize_material`) y espesor exacto, pero largo/ancho
+    dentro de `margen` mm en vez de exactos. Acota candidatos por espesor exacto en la
+    query y resuelve material/tolerancia en Python (SQLite no ofrece comparación
+    case-insensitive trivial para esto)."""
+    normalized_material = _normalize_material(material)
+    candidates = db.query(Product).filter(Product.espesor == espesor).all()
+
+    for candidate in candidates:
+        if _normalize_material(candidate.material) != normalized_material:
+            continue
+        if abs(candidate.largo - largo) <= margen and abs(candidate.ancho - ancho) <= margen:
+            return candidate
+    return None
+
+
+def comprometer_stock(db: Session, product: Product, cantidad: int) -> Product:
+    """Incrementa el stock comprometido del maestro al confirmar una orden. Sin
+    commit: la transacción completa (incluida la creación de la `Orden`) la cierra
+    `orden_service` con un único commit (Block 4)."""
+    product.stock_comprometido += cantidad
+    db.flush()
+    return product
+
+
+def crear_producto_automatico(
+    db: Session, material: str, espesor: float, largo: float, ancho: float
+) -> Product:
+    """Alta automática de un producto maestro cuando no hubo match por tolerancia y el
+    cliente confirmó `crear_producto_automaticamente=True` (FR-15). No pasa por el
+    schema HTTP `ProductCreate` (exige `stock > 0` para el alta manual de FEAT-002);
+    acá el stock inicial es siempre 0 por definición. Reutiliza `_find_duplicate` como
+    chequeo defensivo de condición de carrera contra un `SimpleNamespace` que expone
+    los mismos atributos que `ProductCreate`/`ProductUpdate` (duck typing), sin generar
+    una instancia de esos schemas -que traen sus propias validaciones de stock/punto de
+    pedido, ajenas a este flujo-."""
+    candidate_data = SimpleNamespace(material=material, espesor=espesor, largo=largo, ancho=ancho)
+    if _find_duplicate(db, candidate_data) is not None:
+        raise ProductAlreadyExistsError(material)
+
+    product = Product(
+        material=material,
+        espesor=espesor,
+        largo=largo,
+        ancho=ancho,
+        stock=0,
+        stock_comprometido=0,
+        punto_pedido=0,
+    )
+    db.add(product)
+    db.flush()
     return product
