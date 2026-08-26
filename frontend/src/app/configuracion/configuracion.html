@@ -1,3 +1,27 @@
 <div class="container py-4">
-  <p>Módulo en construcción</p>
+  <h1 class="h3 mb-4">Configuración</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="mb-3">
+      <label for="margen_tolerancia_dimensional" class="form-label"
+        >Margen de tolerancia dimensional (mm)</label
+      >
+      <input
+        id="margen_tolerancia_dimensional"
+        type="number"
+        class="form-control"
+        formControlName="margen_tolerancia_dimensional"
+      />
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+    }
+
+    @if (successMessage()) {
+      <div class="alert alert-success" role="alert">{{ successMessage() }}</div>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
+  </form>
 </div>
