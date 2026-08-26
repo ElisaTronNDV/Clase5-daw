@@ -18,3 +18,8 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
   material+espesor+dimensiones (al crear y al editar) y `stock_comprometido` protegido contra
   escritura del cliente; reemplaza el placeholder de Inventario por un listado real y un formulario
   reactivo compartido entre alta y edición, con `stock_comprometido` de solo lectura.
+- [FEAT-003] Configuración del sistema (margen de tolerancia dimensional): endpoints
+  `GET/PUT /api/configuracion` con valor por defecto (1.0 mm) sin necesitar seed en la base y
+  persistencia global mediante una fila con clave fija (`id=1`, mitigación contra ambigüedad de
+  concurrencia); reemplaza el placeholder de Configuración por un formulario real, con validación
+  espejo del backend.
