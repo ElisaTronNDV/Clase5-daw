@@ -13,3 +13,6 @@ pdfplumber>=0.11,<1.0
 # lo necesita POST /api/ordenes/extraer (Block 4), sin esto FastAPI no puede declarar
 # el parámetro `archivo: UploadFile`.
 python-multipart>=0.0.12,<1.0
+python-barcode>=0.15,<1.0
+pyzbar>=0.1.9,<1.0
+reportlab>=4.0,<5.0

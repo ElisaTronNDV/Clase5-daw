@@ -1,18 +1,20 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, get_db
 from app.core.exceptions import (
     ArchivoCorteInvalidoError,
+    OrdenNotFoundError,
     ProductAlreadyExistsError,
     ProductoSinCoincidenciaError,
 )
 from app.models.user import User
 from app.schemas.orden import OrdenBorrador, OrdenConfirmarRequest, OrdenListItem, OrdenResponse
-from app.services import orden_service, pdf_extraction_service
+from app.services import orden_service, pdf_document_service, pdf_extraction_service
 
 router = APIRouter()
 
@@ -20,6 +22,7 @@ _EXTENSION_INVALIDA_DETAIL = "el archivo debe tener extensión .pdf"
 _MAGIC_BYTES_INVALIDOS_DETAIL = "el archivo no es un PDF válido"
 _TAMANO_EXCEDIDO_DETAIL = "el archivo supera el tamaño máximo permitido de 10 MB"
 _DUPLICATE_DETAIL = "product already registered with this material, thickness and dimensions"
+_ORDEN_NOT_FOUND_DETAIL = "orden not found"
 
 _MAX_BYTES = 10 * 1024 * 1024
 _PDF_MAGIC_BYTES = b"%PDF-"
@@ -100,3 +103,20 @@ def listar_ordenes(
 ) -> ListarOrdenesResponse:
     ordenes = orden_service.listar_ordenes(db, estado=estado, nest=nest)
     return ListarOrdenesResponse(ordenes=ordenes)
+
+
+@router.get("/{id}/documento")
+def descargar_documento_orden(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Response:
+    try:
+        orden, piezas = orden_service.obtener_orden_con_piezas(db, id)
+    except OrdenNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=_ORDEN_NOT_FOUND_DETAIL
+        )
+
+    documento = pdf_document_service.generar_documento_orden(orden, piezas)
+    return Response(content=documento, media_type="application/pdf")

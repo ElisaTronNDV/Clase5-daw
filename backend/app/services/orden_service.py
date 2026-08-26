@@ -5,7 +5,7 @@ listado/búsqueda. La extracción del PDF (sin persistir) vive en `pdf_extractio
 
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ProductoSinCoincidenciaError
+from app.core.exceptions import OrdenNotFoundError, ProductoSinCoincidenciaError
 from app.models.orden import Orden, PiezaOrden
 from app.schemas.orden import OrdenConfirmarRequest
 from app.services import configuracion_service, product_service
@@ -110,3 +110,19 @@ def listar_ordenes(
     if nest:
         query = query.filter(Orden.nest_code.ilike(f"%{nest}%"))
     return query.order_by(Orden.id).all()
+
+
+def obtener_orden_con_piezas(db: Session, id: int) -> tuple[Orden, list[PiezaOrden]]:
+    """Busca una orden por id junto con sus piezas (Block 5: documento descargable).
+
+    No hay `relationship()` ORM entre `Orden` y `PiezaOrden` (ver Block 1/4): las
+    piezas se consultan siempre con una query directa por `orden_id`, nunca vía un
+    atributo dinámico (el `orden.piezas` que arma `confirmar_orden` es solo un valor
+    de vista en memoria para esa request puntual, no persiste ni es accesible después).
+    """
+    orden = db.query(Orden).filter(Orden.id == id).first()
+    if orden is None:
+        raise OrdenNotFoundError(id)
+
+    piezas = db.query(PiezaOrden).filter(PiezaOrden.orden_id == orden.id).all()
+    return orden, piezas
