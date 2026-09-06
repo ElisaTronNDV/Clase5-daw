@@ -1,0 +1,25 @@
+<div class="card">
+  <div class="card-body">
+    <h2 class="h5 card-title">Subir archivo de corte</h2>
+    <p class="text-muted">Seleccioná el PDF generado por el software de corte (Salvagnini).</p>
+
+    <div class="mb-3">
+      <label for="archivo" class="form-label">Archivo (PDF)</label>
+      <input
+        id="archivo"
+        type="file"
+        accept="application/pdf,.pdf"
+        class="form-control"
+        (change)="onFileSelected($event)"
+      />
+    </div>
+
+    @if (cargando()) {
+      <p role="status" class="text-muted">Procesando archivo…</p>
+    }
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+    }
+  </div>
+</div>

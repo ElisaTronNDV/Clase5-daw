@@ -1,0 +1,65 @@
+<div>
+  <h2 class="h5 mb-3">Órdenes de trabajo</h2>
+
+  <form [formGroup]="filtros" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+      <label for="estado" class="form-label">Estado</label>
+      <select id="estado" class="form-select" formControlName="estado">
+        <option value="">Todos</option>
+        <option value="vigente">Vigente</option>
+        <option value="cerrada">Cerrada</option>
+      </select>
+    </div>
+    <div class="col-auto">
+      <label for="nest" class="form-label">Código NEST</label>
+      <input id="nest" type="text" class="form-control" formControlName="nest" placeholder="NEST-000001" />
+    </div>
+  </form>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>NEST</th>
+        <th>Estado</th>
+        <th>Material</th>
+        <th>Espesor</th>
+        <th>Largo</th>
+        <th>Ancho</th>
+        <th>Multiplicidad</th>
+        <th>Creada</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (orden of ordenes(); track orden.id) {
+        <tr>
+          <td>{{ orden.nest_code }}</td>
+          <td>{{ orden.estado }}</td>
+          <td>{{ orden.material }}</td>
+          <td>{{ orden.espesor }}</td>
+          <td>{{ orden.largo }}</td>
+          <td>{{ orden.ancho }}</td>
+          <td>{{ orden.multiplicidad }}</td>
+          <td>{{ orden.created_at | date: 'short' }}</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="descargar(orden.id)"
+            >
+              Descargar documento
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="9" class="text-muted">No hay órdenes que coincidan con el filtro.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

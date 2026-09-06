@@ -1,3 +1,43 @@
 <div class="container py-4">
-  <p>Módulo en construcción</p>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Oficina — Archivo de corte</h1>
+    <div class="btn-group">
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        [class.active]="vista() === 'subir'"
+        (click)="nuevaCarga()"
+      >
+        Subir archivo
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        [class.active]="vista() === 'listado'"
+        (click)="irAListado()"
+      >
+        Ver órdenes
+      </button>
+    </div>
+  </div>
+
+  @if (vista() === 'subir') {
+    <app-subir-archivo (paginasExtraidas)="onPaginasExtraidas($event)" />
+  }
+
+  @if (vista() === 'revision') {
+    <p class="text-muted">
+      Se extrajeron {{ borradores().length }} página(s). Revisá y confirmá cada orden por separado.
+    </p>
+    <app-revision-borrador
+      [borrador]="borradorActual()"
+      [indiceActual]="indiceActual()"
+      [totalPaginas]="borradores().length"
+      (confirmada)="onOrdenConfirmada()"
+    />
+  }
+
+  @if (vista() === 'listado') {
+    <app-listado-ordenes />
+  }
 </div>

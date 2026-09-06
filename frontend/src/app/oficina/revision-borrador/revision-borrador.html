@@ -1,0 +1,81 @@
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <h2 class="h5 card-title mb-0">Revisión del borrador</h2>
+      <span class="badge text-bg-secondary">
+        Página {{ indiceActual() + 1 }} de {{ totalPaginas() }}
+      </span>
+    </div>
+
+    <p class="text-muted">
+      Correlacioná estos datos con la hoja física del archivo de corte
+      <strong>{{ borrador().indice_formato ?? '(sin índice)' }}</strong>.
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div class="mb-3">
+        <label for="material" class="form-label">Material</label>
+        <input id="material" type="text" class="form-control" formControlName="material" />
+      </div>
+
+      <div class="mb-3">
+        <label for="multiplicidad" class="form-label">Multiplicidad</label>
+        <input
+          id="multiplicidad"
+          type="number"
+          class="form-control"
+          formControlName="multiplicidad"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="espesor" class="form-label">Espesor</label>
+        <input id="espesor" type="number" class="form-control" formControlName="espesor" />
+      </div>
+
+      <div class="mb-3">
+        <label for="largo" class="form-label">Largo</label>
+        <input id="largo" type="number" class="form-control" formControlName="largo" />
+      </div>
+
+      <div class="mb-3">
+        <label for="ancho" class="form-label">Ancho</label>
+        <input id="ancho" type="number" class="form-control" formControlName="ancho" />
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+      }
+
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || enviando()">
+        Confirmar orden
+      </button>
+    </form>
+
+    @if (productoNoEncontrado(); as prod) {
+      <div class="alert alert-warning mt-3" role="alertdialog">
+        <h3 class="h6">No se encontró un producto que coincida</h3>
+        <p class="mb-2">
+          No hay un producto en inventario para material <strong>{{ prod.material }}</strong>,
+          espesor {{ prod.espesor }} mm, {{ prod.largo }} × {{ prod.ancho }} mm dentro del margen
+          de tolerancia configurado.
+        </p>
+        <button type="button" class="btn btn-warning" (click)="onCrearProductoYConfirmar()">
+          Crear producto y confirmar
+        </button>
+      </div>
+    }
+
+    @if (ordenConfirmada(); as orden) {
+      <div class="alert alert-success mt-3" role="status">
+        Orden confirmada. Código NEST: <strong>{{ orden.nest_code }}</strong>
+      </div>
+
+      @if (orden.alerta_stock_bajo === true) {
+        <div class="alert alert-warning mt-2" role="alert" data-testid="alerta-stock-bajo">
+          El stock del producto quedó en o por debajo del punto de pedido.
+        </div>
+      }
+    }
+  </div>
+</div>
